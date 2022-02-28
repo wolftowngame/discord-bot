@@ -3,9 +3,15 @@ const BOT_TOKEN = fs.existsSync('.discord') ? fs.readFileSync('.discord').toStri
 const Discord = require('discord.js');
 const { providers, Contract, BigNumber, ethers } = require('ethers');
 const StaticWeb3Read = new providers.JsonRpcProvider('https://bsc-dataseed.binance.org/');
-const db = require('./db.json');
-db.lastBlock = db.lastBlock || 0;
-db.WatchList = db.WatchList || {};
+let db;
+try {
+  db = require('./db.json');
+} finally {
+  db = db || {};
+  db.lastBlock = db.lastBlock || 0;
+  db.WatchList = db.WatchList || {};
+}
+
 const dbSave = () => {
   fs.writeFile('./db.json', JSON.stringify(db), ()=> {});
 };
