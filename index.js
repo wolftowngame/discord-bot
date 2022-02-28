@@ -92,10 +92,21 @@ const emitEvent = (tx, evt = [defaultDvt]) => {
       const evts = evt.filter(e => watchs.includes(e.name));
       const embed = new Discord.MessageEmbed()
       .setColor('#0099ff')
-      .setTitle(`${showAddress(tx.from)} => ${tx.hash}`)
-      .setURL(`https://bscscan.com/tx/${tx.hash}`);
-
-      const btns = {};
+      .setTitle(`tx: ${tx.hash}`)
+      .setAuthor({ name: `from: ${showAddress(tx.from)}` })
+      .setURL(`https://bscscan.com/tx/${tx.hash}`)
+      // .addFields(
+      //   // { name: '\u200B', value: '\u200B' },
+      //   { name: 'Inline field title', value: 'Some value here', inline: true },
+      //   { name: 'Inline field title', value: 'Some value here', inline: true },
+      // )
+      // .addField('Inline field title', 'Some value here', true)
+      // .setImage('https://i.imgur.com/AfFp7pu.png')
+      .setTimestamp()
+      .setFooter({ text: 'Bug and suggestion, contact @imconfig', iconURL: 'https://avatars.githubusercontent.com/u/2430646?v=4' });
+      const btns = {
+        [ethers.constants.AddressZero]: true
+      };
 
       btns[tx.from] = true;
       row.addComponents(new Discord.MessageButton({
@@ -115,17 +126,17 @@ const emitEvent = (tx, evt = [defaultDvt]) => {
       evts.forEach(e => {
         contents.push(`[${e.name}]`);
         e.message.map(s => {
-          if (!btns[s.content] && ethers.utils.isAddress(s.content)) {
+          if (!btns[s.content] && Object.keys(btns).length < 5 && ethers.utils.isAddress(s.content)) {
             row.addComponents(new Discord.MessageButton({
               label: `${showAddress(s.content)}`,
               style: 'LINK',
               url: `https://bscscan.com/address/${s.content}`
             }));
           }
-          contents.push(s.type + ':' + showAddress(s.content));
+          embed.addField(s.type, showAddress(s.content), true);
         });
       });
-      embed.setDescription(contents.join(' '));
+      // embed.setDescription(contents.join(' '));
       ch.send({ content: `${showAddress(tx.from)} => ${showAddress(tx.to)}`, ephemeral: true, embeds: [embed], components: [row] });
     });
   }
