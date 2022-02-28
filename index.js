@@ -22,8 +22,7 @@ const client = new Discord.Client({
 });
 
 const WatchList = db.WatchList = db.WatchList || {};
-const cmds = ['MINT', 'Barn-UNSTAKE', 'STAKE-MILK', 'STAKE-WOOL', 'STAKE-WOLF', 'STOLEN'];
-WatchList['947753505844760607'] = cmds;
+let cmds = ['MINT', 'Barn-UNSTAKE', 'STAKE-MILK', 'STAKE-WOOL', 'STAKE-WOLF', 'STOLEN'];
 Wolf.interface.fragments.forEach(it => {
   if (cmds.includes(it.name)) return;
   cmds.push(it.name);
@@ -32,6 +31,8 @@ Barn.interface.fragments.forEach(it => {
   if (cmds.includes(it.name)) return;
   cmds.push('Barn-' + it.name);
 });
+cmds = cmds.filter(i => i)
+WatchList['947753505844760607'] = cmds;
 
 client.once('ready', () => {
   if (!client.user) return;
@@ -240,7 +241,6 @@ const txCache = {};
           console.error('send msg err', e)
         }
       }
-      console.log(db);
       dbSave();
     } catch(e){
       console.log('e', e)
