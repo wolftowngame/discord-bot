@@ -1,0 +1,5 @@
+
+.discord
+db.json
+/node_modules
+/yarn.lock
