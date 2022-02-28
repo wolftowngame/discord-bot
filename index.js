@@ -81,8 +81,6 @@ client.on('messageCreate', async (msg) => {
       return;
     }
 
-    console.log('lastBlock', db.lastBlock);
-
     msg.channel.send(WatchList[msg.channelId].join(';'));
     return;
   }
@@ -260,6 +258,7 @@ const txCache = {};
   }
 
   while (true) {
+    console.log('lastBlock', db.lastBlock);
     await query();
     await sleep(3000);
   }
