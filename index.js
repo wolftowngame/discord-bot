@@ -122,9 +122,9 @@ const emitEvent = (tx, evt = [defaultDvt]) => {
         url: `https://bscscan.com/address/${tx.to}`
       }));
 
-      const contents = [];
       evts.forEach(e => {
-        contents.push(`[${e.name}]`);
+      const contents = [];
+      contents.push(`[${e.name}]`);
         e.message.map(s => {
           if (!btns[s.content] && Object.keys(btns).length < 5 && ethers.utils.isAddress(s.content)) {
             row.addComponents(new Discord.MessageButton({
@@ -133,10 +133,11 @@ const emitEvent = (tx, evt = [defaultDvt]) => {
               url: `https://bscscan.com/address/${s.content}`
             }));
           }
-          embed.addField(s.type, showAddress(s.content), true);
+          contents.push(`${s.type}:${showAddress(s.content)}`)
         });
+        embed.addField(e.name, contents.join(' '), true);
       });
-      // embed.setDescription(contents.join(' '));
+      embed.setDescription('~~');
       ch.send({ content: `${showAddress(tx.from)} => ${showAddress(tx.to)}`, ephemeral: true, embeds: [embed], components: [row] });
     });
   }
