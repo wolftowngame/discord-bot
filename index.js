@@ -71,6 +71,8 @@ client.on('messageCreate', async (msg) => {
       return;
     }
 
+    console.log('lastBlock', db.lastBlock);
+
     msg.channel.send(WatchList[msg.channelId].join(';'));
     return;
   }
@@ -124,8 +126,7 @@ const emitEvent = (tx, evt = [defaultDvt]) => {
       }));
 
       evts.forEach(e => {
-      const contents = [];
-      contents.push(`[${e.name}]`);
+        const contents = [];
         e.message.map(s => {
           if (!btns[s.content] && Object.keys(btns).length < 5 && ethers.utils.isAddress(s.content)) {
             row.addComponents(new Discord.MessageButton({
