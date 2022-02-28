@@ -51,13 +51,13 @@ client.once('ready', () => {
 client.on('error', (msg) => console.log('error:', msg));
 
 client.on('messageCreate', async (msg) => {
+  console.log(msg, msg.content)
   const bot = client.user;
   const from = msg.author;
   if (from.id === bot.id) return;
   const botWasMentioned = msg.mentions.users.find((mentionedUser) => mentionedUser.id === bot.id);
 
   if (botWasMentioned) {
-    console.log(msg, msg.content)
     WatchList[msg.channelId] = WatchList[msg.channelId] || [];
     const add = msg.content.trim().match(/add\:(.*)$/);
     if (add) {
