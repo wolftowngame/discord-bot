@@ -5,7 +5,7 @@ const { providers, Contract, BigNumber, ethers } = require('ethers');
 const StaticWeb3Read = new providers.JsonRpcProvider('https://bsc-dataseed.binance.org/');
 const db = require('./db.json');
 const dbSave = () => {
-  fs.writeFile('./db.json', JSON.stringify(db));
+  fs.writeFile('./db.json', JSON.stringify(db), ()=> {});
 };
 const Wolf = new Contract('0xE686133662190070c4A4Bea477fCF48dF35F5b2c', require('./Wolf.json'), StaticWeb3Read);
 const Barn = new Contract('0x58eaBB38cc9D68bEA8E645B0f5Ec741C82f2871B', require('./Barn.json'), StaticWeb3Read);
