@@ -92,27 +92,23 @@ const emitEvent = (tx, evt = [defaultDvt]) => {
       const evts = evt.filter(e => watchs.includes(e.name));
       const embed = new Discord.MessageEmbed()
       .setColor('#0099ff')
-      .setTitle(`${showAddress(tx.from)} => ${tx.transactionHash}`)
-      .setURL(`https://bscscan.com/tx/${tx.transactionHash}`);
+      .setTitle(`${showAddress(tx.from)} => ${tx.hash}`)
+      .setURL(`https://bscscan.com/tx/${tx.hash}`);
 
       const btns = {};
 
       btns[tx.from] = true;
       row.addComponents(new Discord.MessageButton({
-        customId: `https://bscscan.com/address/${tx.from}`,
-        // customId: 'from',
         label: `from: ${showAddress(tx.from)}`,
-        style: 'PRIMARY',
-        // url: `https://bscscan.com/address/${tx.from}`
+        style: 'LINK',
+        url: `https://bscscan.com/address/${tx.from}`
       }));
 
       btns[tx.to] = true;
       row.addComponents(new Discord.MessageButton({
-        customId: `https://bscscan.com/address/${tx.to}`,
-        // customId: 'to',
         label: `to: ${showAddress(tx.to)}`,
-        style: 'PRIMARY',
-        // url: `https://bscscan.com/address/${tx.to}`
+        style: 'LINK',
+        url: `https://bscscan.com/address/${tx.to}`
       }));
 
       const contents = [];
@@ -121,10 +117,9 @@ const emitEvent = (tx, evt = [defaultDvt]) => {
         e.message.map(s => {
           if (!btns[s.content] && ethers.utils.isAddress(s.content)) {
             row.addComponents(new Discord.MessageButton({
-              customId: `https://bscscan.com/address/${s.content}`,
               label: `${showAddress(s.content)}`,
-              style: 'PRIMARY',
-              // url: `https://bscscan.com/address/${s.content}`
+              style: 'LINK',
+              url: `https://bscscan.com/address/${s.content}`
             }));
           }
           contents.push(s.type + ':' + showAddress(s.content));
@@ -137,7 +132,12 @@ const emitEvent = (tx, evt = [defaultDvt]) => {
 };
 
 function showAddress(address) {
-  return AddressTranslate[address] || address;
+  const res = AddressTranslate[address] || address;
+  if (ethers.utils.isAddress(res)) return AddressShortString(res);
+  return res;
+}
+function AddressShortString(address) {
+  return address.replace(/(0x[0-9a-zA-Z]{4})(.*?)([0-9a-zA-Z]{4})$/, '$1...$3');
 }
 
 const NumTrue = [1,1,1,1,1,1,1,1,1,1,1];
@@ -230,6 +230,8 @@ const txCache = {};
       }
       console.log(db);
       dbSave();
+    } catch(e){
+      console.log('e', e)
     } finally{
       // 
     }
