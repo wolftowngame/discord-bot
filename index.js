@@ -57,6 +57,7 @@ client.on('messageCreate', async (msg) => {
   const botWasMentioned = msg.mentions.users.find((mentionedUser) => mentionedUser.id === bot.id);
 
   if (botWasMentioned) {
+    console.log(msg, msg.content)
     WatchList[msg.channelId] = WatchList[msg.channelId] || [];
     const add = msg.content.trim().match(/add\:(.*)$/);
     if (add) {
