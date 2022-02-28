@@ -99,18 +99,20 @@ const emitEvent = (tx, evt = [defaultDvt]) => {
 
       btns[tx.from] = true;
       row.addComponents(new Discord.MessageButton({
+        customId: `https://bscscan.com/address/${tx.from}`,
         // customId: 'from',
         label: `from: ${showAddress(tx.from)}`,
         style: 'PRIMARY',
-        url: `https://bscscan.com/address/${tx.from}`
+        // url: `https://bscscan.com/address/${tx.from}`
       }));
 
       btns[tx.to] = true;
       row.addComponents(new Discord.MessageButton({
+        customId: `https://bscscan.com/address/${tx.to}`,
         // customId: 'to',
         label: `to: ${showAddress(tx.to)}`,
         style: 'PRIMARY',
-        url: `https://bscscan.com/address/${tx.to}`
+        // url: `https://bscscan.com/address/${tx.to}`
       }));
 
       const contents = [];
@@ -119,10 +121,10 @@ const emitEvent = (tx, evt = [defaultDvt]) => {
         e.message.map(s => {
           if (!btns[s.content] && ethers.utils.isAddress(s.content)) {
             row.addComponents(new Discord.MessageButton({
-              // customId: s.content,
+              customId: `https://bscscan.com/address/${s.content}`,
               label: `${showAddress(s.content)}`,
               style: 'PRIMARY',
-              url: `https://bscscan.com/address/${s.content}`
+              // url: `https://bscscan.com/address/${s.content}`
             }));
           }
           contents.push(s.type + ':' + showAddress(s.content));
