@@ -6,6 +6,8 @@ const StaticWeb3Read = new providers.JsonRpcProvider('https://bsc-dataseed.binan
 let db;
 try {
   db = require('./db.json');
+} catch(e) {
+  //
 } finally {
   db = db || {};
   db.lastBlock = db.lastBlock || 0;
