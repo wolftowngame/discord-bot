@@ -18,7 +18,7 @@ const AddressTranslate = {
 };
 
 const client = new Discord.Client({
-  intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.DIRECT_MESSAGES, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_INTEGRATIONS],
+  intents: [Discord.Intents.FLAGS.GUILD_MESSAGES],
 });
 
 const WatchList = db.WatchList = db.WatchList || {};
@@ -75,19 +75,6 @@ client.on('messageCreate', async (msg) => {
   }
 });
 
-// client.on('interactionCreate', async (interaction) => {
-//   console.log(interaction);
-//   if (!interaction.isCommand()) return;
-//   const { commandName } = interaction;
-//   if (commandName === 'ping') {
-//     await interaction.reply('Pong!');
-//   } else if (commandName === 'server') {
-//     await interaction.reply(`Server name: ${interaction.guild?.name}\nTotal members: ${interaction.guild?.memberCount}`);
-//   } else if (commandName === 'user') {
-//     await interaction.reply('User info.');
-//   }
-// });
-
 client.login(BOT_TOKEN);
 
 const defaultDvt = {
@@ -142,7 +129,7 @@ const emitEvent = (tx, evt = [defaultDvt]) => {
         });
       });
       embed.setDescription(contents.join(' '));
-      ch.send({ content: '', ephemeral: true, embeds: [embed], components: [row] });
+      ch.send({ content: `${showAddress(tx.from)} => ${showAddress(tx.to)}`, ephemeral: true, embeds: [embed], components: [row] });
     });
   }
 };
