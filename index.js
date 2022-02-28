@@ -99,7 +99,7 @@ const emitEvent = (tx, evt = [defaultDvt]) => {
 
       btns[tx.from] = true;
       row.addComponents(new Discord.MessageButton({
-        customId: 'from',
+        // customId: 'from',
         label: `from: ${showAddress(tx.from)}`,
         style: 'PRIMARY',
         url: `https://bscscan.com/address/${tx.from}`
@@ -107,7 +107,7 @@ const emitEvent = (tx, evt = [defaultDvt]) => {
 
       btns[tx.to] = true;
       row.addComponents(new Discord.MessageButton({
-        customId: 'to',
+        // customId: 'to',
         label: `to: ${showAddress(tx.to)}`,
         style: 'PRIMARY',
         url: `https://bscscan.com/address/${tx.to}`
@@ -119,7 +119,7 @@ const emitEvent = (tx, evt = [defaultDvt]) => {
         e.message.map(s => {
           if (!btns[s.content] && ethers.utils.isAddress(s.content)) {
             row.addComponents(new Discord.MessageButton({
-              customId: s.content,
+              // customId: s.content,
               label: `${showAddress(s.content)}`,
               style: 'PRIMARY',
               url: `https://bscscan.com/address/${s.content}`
