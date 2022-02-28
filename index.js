@@ -97,7 +97,7 @@ const emitEvent = (tx, evt = [defaultDvt]) => {
       const evts = evt.filter(e => watchs.includes(e.name));
       const embed = new Discord.MessageEmbed()
       .setColor('#0099ff')
-      .setTitle(`tx: ${tx.hash}`)
+      .setTitle(`${tx.hash}`)
       .setAuthor({ name: `from: ${showAddress(tx.from)}` })
       .setURL(`https://bscscan.com/tx/${tx.hash}`)
       // .addFields(
@@ -208,9 +208,8 @@ const txCache = {};
           const message = res ? [{
             name: res.name,
             message: [
-              { type: 'string', content: res.from },
-              { type: 'string', content: ' => ' },
-              { type: 'string', content: res.to }
+              { type: 'from', content: tx.from },
+              { type: 'to', content: tx.to }
             ],
           }] : [];
           rtx.logs.forEach(log => {
