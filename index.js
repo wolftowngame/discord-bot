@@ -58,7 +58,7 @@ client.on('messageCreate', async (msg) => {
 
   if (botWasMentioned) {
     WatchList[msg.channelId] = WatchList[msg.channelId] || [];
-    const add = msg.content.trim().match(/^add\:(.*)$/);
+    const add = msg.content.trim().match(/add\:(.*)$/);
     if (add) {
       const event = add[1];
       if (!cmds.includes(event)) return;
@@ -71,7 +71,7 @@ client.on('messageCreate', async (msg) => {
       return;
     }
 
-    const del = msg.content.trim().match(/^del\:(.*)$/);
+    const del = msg.content.trim().match(/del\:(.*)$/);
     if (del) {
       const event = del[1];
       if (!cmds.includes(event)) return;
