@@ -70,7 +70,7 @@ var client = new discord_js_1.Client({
     intents: [discord_js_1.Intents.FLAGS.GUILD_MESSAGES]
 });
 var WatchList = (db.WatchList = db.WatchList || {});
-var cmds = ['MINT', 'Barn-UNSTAKE', 'STAKE-MILK', 'STAKE-WOOL', 'STAKE-WOLF', 'STOLEN'];
+var cmds = ['MINT', 'Unknown', 'Barn-UNSTAKE', 'STAKE-MILK', 'STAKE-WOOL', 'STAKE-WOLF', 'STOLEN'];
 Wolf.interface.fragments.forEach(function (it) {
     if (cmds.includes(it.name))
         return;
@@ -279,7 +279,7 @@ var txCache = {};
                         switch (_a.label) {
                             case 0:
                                 _a.trys.push([0, 6, 7, 8]);
-                                return [4 /*yield*/, Wolf.queryFilter({}, (-60 * 60) / 3, 'latest')];
+                                return [4 /*yield*/, Wolf.queryFilter({}, (-120 * 60) / 3, 'latest')];
                             case 1:
                                 res = _a.sent();
                                 adds_2 = [];
@@ -301,20 +301,20 @@ var txCache = {};
                                     // const transferData = txCacheMap[item.transactionHash];
                                 });
                                 _loop_2 = function (msg) {
-                                    var _b, tx, rtx, res_1, message_1, e_2;
+                                    var _b, tx_1, rtx, res_1, message_1, mainEvt, MINT_1, parseLog, fromZero, loseNum, e_2;
                                     return __generator(this, function (_c) {
                                         switch (_c.label) {
                                             case 0:
                                                 _c.trys.push([0, 2, , 3]);
                                                 return [4 /*yield*/, Promise.all([StaticWeb3Read.getTransaction(msg.tx), StaticWeb3Read.getTransactionReceipt(msg.tx)])];
                                             case 1:
-                                                _b = _c.sent(), tx = _b[0], rtx = _b[1];
+                                                _b = _c.sent(), tx_1 = _b[0], rtx = _b[1];
                                                 res_1 = void 0;
-                                                if (tx.to === Wolf.address) {
-                                                    res_1 = Wolf.interface.parseTransaction(tx);
+                                                if (tx_1.to === Wolf.address) {
+                                                    res_1 = Wolf.interface.parseTransaction(tx_1);
                                                 }
-                                                else if (tx.to === Barn.address) {
-                                                    res_1 = Barn.interface.parseTransaction(tx);
+                                                else if (tx_1.to === Barn.address) {
+                                                    res_1 = Barn.interface.parseTransaction(tx_1);
                                                 }
                                                 else {
                                                     res_1 = null;
@@ -323,12 +323,18 @@ var txCache = {};
                                                     {
                                                         name: res_1 ? res_1.name : 'Unknown',
                                                         message: [
-                                                            { type: 'from', content: tx.from },
-                                                            { type: 'to', content: tx.to },
+                                                            { type: 'from', content: tx_1.from },
+                                                            { type: 'to', content: tx_1.to },
                                                         ]
                                                     },
                                                 ];
-                                                rtx.logs.forEach(function (log) {
+                                                mainEvt = message_1[0].name;
+                                                MINT_1 = null;
+                                                if (mainEvt === 'mintMany') {
+                                                    MINT_1 = { name: 'MINT', message: [] };
+                                                    message_1.push(MINT_1);
+                                                }
+                                                parseLog = rtx.logs.map(function (log) {
                                                     var parse;
                                                     if (log.address === Wolf.address) {
                                                         parse = Wolf.interface.parseLog(log);
@@ -337,7 +343,7 @@ var txCache = {};
                                                         parse = Barn.interface.parseLog(log);
                                                     }
                                                     else {
-                                                        return;
+                                                        return null;
                                                     }
                                                     var evt = {
                                                         name: parse.name,
@@ -358,8 +364,22 @@ var txCache = {};
                                                         }
                                                     }
                                                     message_1.push(evt);
+                                                    return parse;
                                                 });
-                                                emitEvent(tx, message_1);
+                                                if (MINT_1) {
+                                                    fromZero = parseLog.filter(function (i) { return i && i.name === 'Transfer' && i.args.from === ethers_1.ethers.constants.AddressZero; });
+                                                    loseNum = parseLog.filter(function (i) { return i && i.name === 'Transfer' && [tx_1.from, Barn.address].includes(i.args.to); });
+                                                    MINT_1.message.push({ type: 'mint', content: fromZero.length + '' });
+                                                    MINT_1.message.push({ type: 'lose', content: loseNum.length + '' });
+                                                    parseLog.forEach(function (i) {
+                                                        if (!i)
+                                                            return;
+                                                        if (i.name === 'TokenStolen' && MINT_1) {
+                                                            MINT_1.message.push({ type: 'STOLEN', content: showAddress(i.args._address) + " #" + i.args._tokenId.toString() });
+                                                        }
+                                                    });
+                                                }
+                                                emitEvent(tx_1, message_1);
                                                 return [3 /*break*/, 3];
                                             case 2:
                                                 e_2 = _c.sent();

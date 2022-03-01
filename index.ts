@@ -33,7 +33,7 @@ const client = new Client({
 });
 
 const WatchList = (db.WatchList = db.WatchList || {});
-let cmds = ['MINT', 'Barn-UNSTAKE', 'STAKE-MILK', 'STAKE-WOOL', 'STAKE-WOLF', 'STOLEN'];
+let cmds = ['MINT', 'Unknown', 'Barn-UNSTAKE', 'STAKE-MILK', 'STAKE-WOOL', 'STAKE-WOLF', 'STOLEN'];
 Wolf.interface.fragments.forEach((it) => {
   if (cmds.includes(it.name)) return;
   cmds.push(it.name);
@@ -219,7 +219,7 @@ const txCache: Record<string, boolean> = {};
 (async () => {
   const query = async () => {
     try {
-      const res = await Wolf.queryFilter({}, (-60 * 60) / 3, 'latest');
+      const res = await Wolf.queryFilter({}, (-120 * 60) / 3, 'latest');
       const adds: { tx: string; key: string }[] = [];
       const txCacheMap: Record<string, typeof adds[0]> = {};
       res.forEach((item) => {
@@ -256,14 +256,20 @@ const txCache: Record<string, boolean> = {};
               ],
             },
           ];
-          rtx.logs.forEach((log) => {
+          const mainEvt = message[0].name;
+          let MINT: typeof message[0] | null = null;
+          if (mainEvt === 'mintMany') {
+            MINT = { name: 'MINT', message: [] };
+            message.push(MINT);
+          }
+          const parseLog = rtx.logs.map((log) => {
             let parse: ReturnType<typeof Wolf.interface.parseLog>;
             if (log.address === Wolf.address) {
               parse = Wolf.interface.parseLog(log);
             } else if (log.address === Barn.address) {
               parse = Barn.interface.parseLog(log);
             } else {
-              return;
+              return null;
             }
             const evt = {
               name: parse.name,
@@ -281,7 +287,22 @@ const txCache: Record<string, boolean> = {};
               }
             }
             message.push(evt);
+            return parse;
           });
+
+          if (MINT) {
+            const fromZero = parseLog.filter((i) => i && i.name === 'Transfer' && i.args.from === ethers.constants.AddressZero);
+            const loseNum = parseLog.filter((i) => i && i.name === 'Transfer' && [tx.from, Barn.address].includes(i.args.to));
+            MINT.message.push({ type: 'mint', content: fromZero.length + '' });
+            MINT.message.push({ type: 'lose', content: loseNum.length + '' });
+            parseLog.forEach((i) => {
+              if (!i) return;
+              if (i.name === 'TokenStolen' && MINT) {
+                MINT.message.push({ type: 'STOLEN', content: `${showAddress(i.args._address)} #${i.args._tokenId.toString()}` });
+              }
+            });
+          }
+
           emitEvent(tx, message);
         } catch (e) {
           console.error('send msg err', e);
