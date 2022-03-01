@@ -223,6 +223,7 @@ var emitEvent = function (tx, evt) {
                                         TokenInfoCache[token] = wolf;
                                         return wolf;
                                     });
+                                    return TokenInfoReqCache[token];
                                 }))];
                         case 1:
                             _a.sent();
