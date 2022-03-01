@@ -208,12 +208,16 @@ var emitEvent = function (tx, evt) {
                     embed.addField(e.name, contents.join(' '), true);
                 });
                 embed.setDescription('~~');
-                var files = tokenIds
+                var tokens = tokenIds
                     .filter(function (i) { return TokenInfoCache[i]; })
                     .map(function (id) {
-                    return new discord_js_1.MessageAttachment(TokenInfoCache[id].image);
+                    var wolf = TokenInfoCache[id];
+                    var type = getWolfAttr('type', wolf);
+                    if (type === 'Wolf')
+                        return "#" + wolf.name + "(" + getWolfAttr('alpha', wolf) + ")";
+                    return "#" + wolf.name;
                 });
-                return { msg: { content: "TO: " + showAddress(tx.to, false), embeds: [embed], components: [row], files: files }, tokenIds: tokenIds };
+                return { msg: { content: "TO: " + showAddress(tx.to, false) + " " + tokens.join(' '), embeds: [embed], components: [row] }, tokenIds: tokenIds };
             };
             var send = getMsg();
             var needAwait = send.tokenIds.filter(function (t) { return !TokenInfoCache[t]; });
@@ -243,6 +247,12 @@ var emitEvent = function (tx, evt) {
     for (var id in db.WatchList) {
         _loop_1(id);
     }
+};
+var getWolfAttr = function (name, wolf) {
+    var res = wolf.attributes.find(function (i) { return i.trait_type === name; });
+    if (!res)
+        return '';
+    return res.value;
 };
 var getAniJSON = function (uri) { return __awaiter(void 0, void 0, void 0, function () {
     var res;

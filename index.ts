@@ -174,12 +174,15 @@ const emitEvent = (tx: providers.TransactionResponse, evt = [defaultDvt]) => {
         });
         embed.setDescription('~~');
 
-        const files = tokenIds
+        const tokens = tokenIds
           .filter((i) => TokenInfoCache[i])
           .map((id) => {
-            return new MessageAttachment(TokenInfoCache[id].image);
+            const wolf = TokenInfoCache[id];
+            const type = getWolfAttr('type', wolf);
+            if (type === 'Wolf') return `#${wolf.name}(${getWolfAttr('alpha', wolf)})`;
+            return `#${wolf.name}`;
           });
-        return { msg: { content: `TO: ${showAddress(tx.to!, false)}`, embeds: [embed], components: [row], files }, tokenIds };
+        return { msg: { content: `TO: ${showAddress(tx.to!, false)} ${tokens.join(' ')}`, embeds: [embed], components: [row] }, tokenIds };
       };
       const send = getMsg();
       const needAwait = send.tokenIds.filter((t) => !TokenInfoCache[t]);
@@ -198,6 +201,12 @@ const emitEvent = (tx: providers.TransactionResponse, evt = [defaultDvt]) => {
       });
     });
   }
+};
+
+const getWolfAttr = (name: string, wolf: Wolf) => {
+  const res = wolf.attributes.find((i) => i.trait_type === name);
+  if (!res) return '';
+  return res.value;
 };
 interface Wolf {
   attributes: Array<{ trait_type: string; value: string }>;
