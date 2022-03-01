@@ -140,7 +140,6 @@ var defaultDvt = {
 var ChannelCache = {};
 var TokenInfoReqCache = {};
 var TokenInfoCache = {};
-ChannelCache[testCid] = client.channels.fetch(testCid);
 var emitEvent = function (tx, evt) {
     if (evt === void 0) { evt = [defaultDvt]; }
     var _loop_1 = function (id) {

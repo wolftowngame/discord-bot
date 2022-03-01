@@ -101,7 +101,6 @@ const defaultDvt = {
 const ChannelCache: Record<string, Promise<TextChannel>> = {};
 const TokenInfoReqCache: Record<string, Promise<Wolf>> = {};
 const TokenInfoCache: Record<string, Wolf> = {};
-ChannelCache[testCid] = client.channels.fetch(testCid) as Promise<TextChannel>;
 
 const emitEvent = (tx: providers.TransactionResponse, evt = [defaultDvt]) => {
   for (const id in db.WatchList) {
