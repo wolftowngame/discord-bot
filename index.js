@@ -184,7 +184,7 @@ var emitEvent = function (tx, evt) {
                 evts.forEach(function (e) {
                     var contents = [];
                     e.message.map(function (s) {
-                        if (s.type === 'tokenId' && !tokenIds.includes(s.type)) {
+                        if (s.type === 'tokenId' && !tokenIds.includes(s.content)) {
                             tokenIds.push(s.content);
                         }
                         if (!btns[s.content] && Object.keys(btns).length < 6 && ethers_1.ethers.utils.isAddress(s.content)) {
@@ -279,7 +279,7 @@ var txCache = {};
                         switch (_a.label) {
                             case 0:
                                 _a.trys.push([0, 6, 7, 8]);
-                                return [4 /*yield*/, Wolf.queryFilter({}, (-30 * 60) / 3, 'latest')];
+                                return [4 /*yield*/, Wolf.queryFilter({}, (-60 * 60) / 3, 'latest')];
                             case 1:
                                 res = _a.sent();
                                 adds_2 = [];
@@ -319,17 +319,15 @@ var txCache = {};
                                                 else {
                                                     res_1 = null;
                                                 }
-                                                message_1 = res_1
-                                                    ? [
-                                                        {
-                                                            name: res_1.name,
-                                                            message: [
-                                                                { type: 'from', content: tx.from },
-                                                                { type: 'to', content: tx.to },
-                                                            ]
-                                                        },
-                                                    ]
-                                                    : [];
+                                                message_1 = [
+                                                    {
+                                                        name: res_1 ? res_1.name : 'Unknown',
+                                                        message: [
+                                                            { type: 'from', content: tx.from },
+                                                            { type: 'to', content: tx.to },
+                                                        ]
+                                                    },
+                                                ];
                                                 rtx.logs.forEach(function (log) {
                                                     var parse;
                                                     if (log.address === Wolf.address) {

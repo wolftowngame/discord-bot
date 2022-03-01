@@ -143,7 +143,7 @@ const emitEvent = (tx: providers.TransactionResponse, evt = [defaultDvt]) => {
         evts.forEach((e) => {
           const contents: string[] = [];
           e.message.map((s) => {
-            if (s.type === 'tokenId' && !tokenIds.includes(s.type)) {
+            if (s.type === 'tokenId' && !tokenIds.includes(s.content)) {
               tokenIds.push(s.content);
             }
             if (!btns[s.content] && Object.keys(btns).length < 6 && ethers.utils.isAddress(s.content)) {
@@ -219,7 +219,7 @@ const txCache: Record<string, boolean> = {};
 (async () => {
   const query = async () => {
     try {
-      const res = await Wolf.queryFilter({}, (-30 * 60) / 3, 'latest');
+      const res = await Wolf.queryFilter({}, (-60 * 60) / 3, 'latest');
       const adds: { tx: string; key: string }[] = [];
       const txCacheMap: Record<string, typeof adds[0]> = {};
       res.forEach((item) => {
@@ -247,17 +247,15 @@ const txCache: Record<string, boolean> = {};
           } else {
             res = null;
           }
-          const message = res
-            ? [
-                {
-                  name: res.name,
-                  message: [
-                    { type: 'from', content: tx.from },
-                    { type: 'to', content: tx.to! },
-                  ],
-                },
-              ]
-            : [];
+          const message = [
+            {
+              name: res ? res.name : 'Unknown',
+              message: [
+                { type: 'from', content: tx.from },
+                { type: 'to', content: tx.to! },
+              ],
+            },
+          ];
           rtx.logs.forEach((log) => {
             let parse: ReturnType<typeof Wolf.interface.parseLog>;
             if (log.address === Wolf.address) {
