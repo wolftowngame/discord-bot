@@ -179,35 +179,22 @@ var emitEvent = function (tx, evt) {
                     _a[ethers_1.ethers.constants.AddressZero] = true,
                     _a);
                 btns[tx.from] = true;
-                row.addComponents(new discord_js_1.MessageButton({
-                    label: "from: " + showAddress(tx.from),
-                    style: 'LINK',
-                    url: "https://bscscan.com/address/" + tx.from
-                }));
+                row.addComponents(new discord_js_1.MessageButton({ label: "from: " + showAddress(tx.from), style: 'LINK', url: "https://bscscan.com/address/" + tx.from }));
                 btns[tx.to] = true;
-                row.addComponents(new discord_js_1.MessageButton({
-                    label: "to: " + showAddress(tx.to),
-                    style: 'LINK',
-                    url: "https://bscscan.com/address/" + tx.to
-                }));
+                row.addComponents(new discord_js_1.MessageButton({ label: "to: " + showAddress(tx.to), style: 'LINK', url: "https://bscscan.com/address/" + tx.to }));
                 evts.forEach(function (e) {
                     var contents = [];
                     e.message.map(function (s) {
                         if (s.type === 'tokenId' && !tokenIds.includes(s.type)) {
                             tokenIds.push(s.content);
                         }
-                        if (!btns[s.content] && Object.keys(btns).length < 5 && ethers_1.ethers.utils.isAddress(s.content)) {
-                            row.addComponents(new discord_js_1.MessageButton({
-                                label: "" + showAddress(s.content),
-                                style: 'LINK',
-                                url: "https://bscscan.com/address/" + s.content
-                            }));
+                        if (!btns[s.content] && Object.keys(btns).length < 4 && ethers_1.ethers.utils.isAddress(s.content)) {
+                            row.addComponents(new discord_js_1.MessageButton({ label: "" + showAddress(s.content), style: 'LINK', url: "https://bscscan.com/address/" + s.content }));
                         }
                         contents.push(s.type + ":" + showAddress(s.content));
                     });
                     embed.addField(e.name, contents.join(' '), true);
                 });
-                embed.setDescription('~~');
                 var tokens = tokenIds
                     .filter(function (i) { return TokenInfoCache[i]; })
                     .map(function (id) {
@@ -217,7 +204,8 @@ var emitEvent = function (tx, evt) {
                         return "#" + wolf.name + "(" + getWolfAttr('alpha', wolf) + ")";
                     return "#" + wolf.name;
                 });
-                return { msg: { content: "TO: " + showAddress(tx.to, false) + " " + tokens.join(' '), embeds: [embed], components: [row] }, tokenIds: tokenIds };
+                embed.setDescription('~~' + tokens.join(' '));
+                return { msg: { content: "TO: " + showAddress(tx.to, false), embeds: [embed], components: [row] }, tokenIds: tokenIds };
             };
             var send = getMsg();
             var needAwait = send.tokenIds.filter(function (t) { return !TokenInfoCache[t]; });

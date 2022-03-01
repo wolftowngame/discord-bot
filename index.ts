@@ -136,22 +136,10 @@ const emitEvent = (tx: providers.TransactionResponse, evt = [defaultDvt]) => {
         };
 
         btns[tx.from] = true;
-        row.addComponents(
-          new MessageButton({
-            label: `from: ${showAddress(tx.from)}`,
-            style: 'LINK',
-            url: `https://bscscan.com/address/${tx.from}`,
-          })
-        );
+        row.addComponents(new MessageButton({ label: `from: ${showAddress(tx.from)}`, style: 'LINK', url: `https://bscscan.com/address/${tx.from}` }));
 
         btns[tx.to!] = true;
-        row.addComponents(
-          new MessageButton({
-            label: `to: ${showAddress(tx.to!)}`,
-            style: 'LINK',
-            url: `https://bscscan.com/address/${tx.to}`,
-          })
-        );
+        row.addComponents(new MessageButton({ label: `to: ${showAddress(tx.to!)}`, style: 'LINK', url: `https://bscscan.com/address/${tx.to}` }));
 
         evts.forEach((e) => {
           const contents: string[] = [];
@@ -159,20 +147,13 @@ const emitEvent = (tx: providers.TransactionResponse, evt = [defaultDvt]) => {
             if (s.type === 'tokenId' && !tokenIds.includes(s.type)) {
               tokenIds.push(s.content);
             }
-            if (!btns[s.content] && Object.keys(btns).length < 5 && ethers.utils.isAddress(s.content)) {
-              row.addComponents(
-                new MessageButton({
-                  label: `${showAddress(s.content)}`,
-                  style: 'LINK',
-                  url: `https://bscscan.com/address/${s.content}`,
-                })
-              );
+            if (!btns[s.content] && Object.keys(btns).length < 4 && ethers.utils.isAddress(s.content)) {
+              row.addComponents(new MessageButton({ label: `${showAddress(s.content)}`, style: 'LINK', url: `https://bscscan.com/address/${s.content}` }));
             }
             contents.push(`${s.type}:${showAddress(s.content)}`);
           });
           embed.addField(e.name, contents.join(' '), true);
         });
-        embed.setDescription('~~');
 
         const tokens = tokenIds
           .filter((i) => TokenInfoCache[i])
@@ -182,7 +163,8 @@ const emitEvent = (tx: providers.TransactionResponse, evt = [defaultDvt]) => {
             if (type === 'Wolf') return `#${wolf.name}(${getWolfAttr('alpha', wolf)})`;
             return `#${wolf.name}`;
           });
-        return { msg: { content: `TO: ${showAddress(tx.to!, false)} ${tokens.join(' ')}`, embeds: [embed], components: [row] }, tokenIds };
+        embed.setDescription('~~' + tokens.join(' '));
+        return { msg: { content: `TO: ${showAddress(tx.to!, false)}`, embeds: [embed], components: [row] }, tokenIds };
       };
       const send = getMsg();
       const needAwait = send.tokenIds.filter((t) => !TokenInfoCache[t]);
