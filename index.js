@@ -93,7 +93,6 @@ client.on('error', function (msg) { return console.log('error:', msg); });
 client.on('messageCreate', function (msg) { return __awaiter(void 0, void 0, void 0, function () {
     var bot, from, botWasMentioned, add, event_1, del, event_2;
     return __generator(this, function (_a) {
-        console.log(msg, msg.content);
         bot = client.user;
         from = msg.author;
         if (from.id === bot.id)

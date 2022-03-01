@@ -53,7 +53,6 @@ client.once('ready', () => {
 client.on('error', (msg) => console.log('error:', msg));
 
 client.on('messageCreate', async (msg) => {
-  console.log(msg, msg.content);
   const bot = client.user!;
   const from = msg.author;
   if (from.id === bot.id) return;
