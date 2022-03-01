@@ -5,6 +5,8 @@ import axios, { Axios } from 'axios';
 import { providers, Contract, BigNumber, ethers } from 'ethers';
 const StaticWeb3Read = new providers.JsonRpcProvider('https://bsc-dataseed.binance.org/');
 let db: { lastBlock: number; WatchList: Record<string, string[]> } = {} as any;
+
+const AdminUser = ['885409915055775754'];
 try {
   db = require('./db.json');
 } catch (e) {
@@ -59,7 +61,7 @@ client.on('messageCreate', async (msg) => {
   if (from.id === bot.id) return;
   const botWasMentioned = msg.mentions.users.find((mentionedUser) => mentionedUser.id === bot.id);
 
-  if (botWasMentioned) {
+  if (botWasMentioned && AdminUser.includes(from.id)) {
     WatchList[msg.channelId] = WatchList[msg.channelId] || [];
     const add = msg.content.trim().match(/add\:(.*)$/);
     if (add) {
@@ -85,6 +87,14 @@ client.on('messageCreate', async (msg) => {
       msg.channel.send('Successful');
       dbSave();
       return;
+    }
+
+    const pub = msg.content.trim().match(/pub\:(.*)$/);
+    if (pub) {
+      const cid = pub[1];
+      client.channels.fetch(cid).then((ch) => {
+        if (ch) (ch as TextChannel).send('Hello!');
+      });
     }
 
     msg.channel.send(WatchList[msg.channelId].join(';'));
@@ -294,12 +304,12 @@ const txCache: Record<string, boolean> = {};
           if (MINT) {
             const fromZero = parseLog.filter((i) => i && i.name === 'Transfer' && i.args.from === ethers.constants.AddressZero);
             const loseNum = parseLog.filter((i) => i && i.name === 'Transfer' && [tx.from, Barn.address].includes(i.args.to));
-            MINT.message.push({ type: 'mint', content: fromZero.length + '' });
-            MINT.message.push({ type: 'lose', content: loseNum.length + '' });
+            MINT.message.push({ type: '\r\nmint', content: fromZero.length + '' });
+            MINT.message.push({ type: '\r\nlose', content: loseNum.length + '' });
             parseLog.forEach((i) => {
               if (!i) return;
               if (i.name === 'TokenStolen' && MINT) {
-                MINT.message.push({ type: 'STOLEN', content: `${showAddress(i.args._address)} #${i.args._tokenId.toString()}` });
+                MINT.message.push({ type: '\r\nSTOLEN', content: `${showAddress(i.args._address)} #${i.args._tokenId.toString()}` });
               }
             });
           }

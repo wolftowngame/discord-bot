@@ -44,6 +44,7 @@ var axios_1 = require("axios");
 var ethers_1 = require("ethers");
 var StaticWeb3Read = new ethers_1.providers.JsonRpcProvider('https://bsc-dataseed.binance.org/');
 var db = {};
+var AdminUser = ['885409915055775754'];
 try {
     db = require('./db.json');
 }
@@ -91,7 +92,7 @@ client.once('ready', function () {
 });
 client.on('error', function (msg) { return console.log('error:', msg); });
 client.on('messageCreate', function (msg) { return __awaiter(void 0, void 0, void 0, function () {
-    var bot, from, botWasMentioned, add, event_1, del, event_2;
+    var bot, from, botWasMentioned, add, event_1, del, event_2, pub, cid;
     return __generator(this, function (_a) {
         console.log('messageCreate', msg.channelId);
         bot = client.user;
@@ -99,7 +100,7 @@ client.on('messageCreate', function (msg) { return __awaiter(void 0, void 0, voi
         if (from.id === bot.id)
             return [2 /*return*/];
         botWasMentioned = msg.mentions.users.find(function (mentionedUser) { return mentionedUser.id === bot.id; });
-        if (botWasMentioned) {
+        if (botWasMentioned && AdminUser.includes(from.id)) {
             WatchList[msg.channelId] = WatchList[msg.channelId] || [];
             add = msg.content.trim().match(/add\:(.*)$/);
             if (add) {
@@ -125,6 +126,14 @@ client.on('messageCreate', function (msg) { return __awaiter(void 0, void 0, voi
                 msg.channel.send('Successful');
                 dbSave();
                 return [2 /*return*/];
+            }
+            pub = msg.content.trim().match(/pub\:(.*)$/);
+            if (pub) {
+                cid = pub[1];
+                client.channels.fetch(cid).then(function (ch) {
+                    if (ch)
+                        ch.send('Hello!');
+                });
             }
             msg.channel.send(WatchList[msg.channelId].join(';'));
             return [2 /*return*/];
@@ -370,13 +379,13 @@ var txCache = {};
                                                 if (MINT_1) {
                                                     fromZero = parseLog.filter(function (i) { return i && i.name === 'Transfer' && i.args.from === ethers_1.ethers.constants.AddressZero; });
                                                     loseNum = parseLog.filter(function (i) { return i && i.name === 'Transfer' && [tx_1.from, Barn.address].includes(i.args.to); });
-                                                    MINT_1.message.push({ type: 'mint', content: fromZero.length + '' });
-                                                    MINT_1.message.push({ type: 'lose', content: loseNum.length + '' });
+                                                    MINT_1.message.push({ type: '\r\nmint', content: fromZero.length + '' });
+                                                    MINT_1.message.push({ type: '\r\nlose', content: loseNum.length + '' });
                                                     parseLog.forEach(function (i) {
                                                         if (!i)
                                                             return;
                                                         if (i.name === 'TokenStolen' && MINT_1) {
-                                                            MINT_1.message.push({ type: 'STOLEN', content: showAddress(i.args._address) + " #" + i.args._tokenId.toString() });
+                                                            MINT_1.message.push({ type: '\r\nSTOLEN', content: showAddress(i.args._address) + " #" + i.args._tokenId.toString() });
                                                         }
                                                     });
                                                 }
