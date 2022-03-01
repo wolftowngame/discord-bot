@@ -202,10 +202,10 @@ var emitEvent = function (tx, evt) {
                     var wolf = TokenInfoCache[id];
                     var type = getWolfAttr('type', wolf);
                     if (type === 'Wolf')
-                        return "#" + wolf.name + "(" + getWolfAttr('alpha', wolf) + ")";
-                    return "#" + wolf.name;
+                        return wolf.name + "(" + getWolfAttr('alpha', wolf) + ")";
+                    return "" + wolf.name;
                 });
-                embed.setDescription(desc.join('\r\n') + tokens.join('\r'));
+                embed.setDescription(desc.join('\r\n') + '\r\n' + tokens.join('\r'));
                 return { msg: { content: "TO: " + showAddress(tx.to, false), embeds: [embed], components: [row] }, tokenIds: tokenIds };
             };
             var send = getMsg();
