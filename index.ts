@@ -112,7 +112,9 @@ const emitEvent = (tx: providers.TransactionResponse, evt = [defaultDvt]) => {
     const evts = evt.filter((e) => watchs.includes(con + e.name));
     if (evts.length === 0) continue;
     if (!ChannelCache[id]) ChannelCache[id] = client.channels.fetch(id) as Promise<TextChannel>;
+    console.log(id, ChannelCache[id]);
     ChannelCache[id].then((ch) => {
+      console.log(id, ch);
       const getMsg = () => {
         const tokenIds: string[] = [];
         const row = new MessageActionRow();
