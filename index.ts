@@ -178,6 +178,7 @@ const emitEvent = (tx: providers.TransactionResponse, evt = [defaultDvt]) => {
               TokenInfoCache[token] = wolf;
               return wolf;
             });
+            return TokenInfoReqCache[token];
           })
         );
         msg.edit(getMsg().msg);
