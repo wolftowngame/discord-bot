@@ -111,9 +111,7 @@ const emitEvent = (tx: providers.TransactionResponse, evt = [defaultDvt]) => {
     const evts = evt.filter((e) => watchs.includes(con + e.name));
     if (evts.length === 0) continue;
     if (!ChannelCache[id]) ChannelCache[id] = client.channels.fetch(id) as Promise<TextChannel>;
-    console.log(id, ChannelCache[id]);
     ChannelCache[id].then((ch) => {
-      console.log(id, ch);
       const getMsg = () => {
         const tokenIds: string[] = [];
         const row = new MessageActionRow();
@@ -141,18 +139,21 @@ const emitEvent = (tx: providers.TransactionResponse, evt = [defaultDvt]) => {
         btns[tx.to!] = true;
         row.addComponents(new MessageButton({ label: `to: ${showAddress(tx.to!)}`, style: 'LINK', url: `https://bscscan.com/address/${tx.to}` }));
 
+        let desc: string[] = [];
         evts.forEach((e) => {
           const contents: string[] = [];
           e.message.map((s) => {
             if (s.type === 'tokenId' && !tokenIds.includes(s.type)) {
               tokenIds.push(s.content);
             }
-            if (!btns[s.content] && Object.keys(btns).length < 4 && ethers.utils.isAddress(s.content)) {
+            if (!btns[s.content] && Object.keys(btns).length < 6 && ethers.utils.isAddress(s.content)) {
+              btns[s.content] = true;
               row.addComponents(new MessageButton({ label: `${showAddress(s.content)}`, style: 'LINK', url: `https://bscscan.com/address/${s.content}` }));
             }
             contents.push(`${s.type}:${showAddress(s.content)}`);
           });
-          embed.addField(e.name, contents.join(' '), true);
+          // embed.addField(e.name, contents.join(' '), true);
+          desc.push(`[${e.name}]:${contents.join(' ')}`);
         });
 
         const tokens = tokenIds
@@ -163,7 +164,7 @@ const emitEvent = (tx: providers.TransactionResponse, evt = [defaultDvt]) => {
             if (type === 'Wolf') return `#${wolf.name}(${getWolfAttr('alpha', wolf)})`;
             return `#${wolf.name}`;
           });
-        embed.setDescription('~~' + tokens.join(' '));
+        embed.setDescription(desc.join('\r\n') + tokens.join('\r'));
         return { msg: { content: `TO: ${showAddress(tx.to!, false)}`, embeds: [embed], components: [row] }, tokenIds };
       };
       const send = getMsg();

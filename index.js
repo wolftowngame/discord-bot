@@ -154,9 +154,7 @@ var emitEvent = function (tx, evt) {
             return "continue";
         if (!ChannelCache[id])
             ChannelCache[id] = client.channels.fetch(id);
-        console.log(id, ChannelCache[id]);
         ChannelCache[id].then(function (ch) {
-            console.log(id, ch);
             var getMsg = function () {
                 var _a;
                 var tokenIds = [];
@@ -182,18 +180,21 @@ var emitEvent = function (tx, evt) {
                 row.addComponents(new discord_js_1.MessageButton({ label: "from: " + showAddress(tx.from), style: 'LINK', url: "https://bscscan.com/address/" + tx.from }));
                 btns[tx.to] = true;
                 row.addComponents(new discord_js_1.MessageButton({ label: "to: " + showAddress(tx.to), style: 'LINK', url: "https://bscscan.com/address/" + tx.to }));
+                var desc = [];
                 evts.forEach(function (e) {
                     var contents = [];
                     e.message.map(function (s) {
                         if (s.type === 'tokenId' && !tokenIds.includes(s.type)) {
                             tokenIds.push(s.content);
                         }
-                        if (!btns[s.content] && Object.keys(btns).length < 4 && ethers_1.ethers.utils.isAddress(s.content)) {
+                        if (!btns[s.content] && Object.keys(btns).length < 6 && ethers_1.ethers.utils.isAddress(s.content)) {
+                            btns[s.content] = true;
                             row.addComponents(new discord_js_1.MessageButton({ label: "" + showAddress(s.content), style: 'LINK', url: "https://bscscan.com/address/" + s.content }));
                         }
                         contents.push(s.type + ":" + showAddress(s.content));
                     });
-                    embed.addField(e.name, contents.join(' '), true);
+                    // embed.addField(e.name, contents.join(' '), true);
+                    desc.push("[" + e.name + "]:" + contents.join(' '));
                 });
                 var tokens = tokenIds
                     .filter(function (i) { return TokenInfoCache[i]; })
@@ -204,7 +205,7 @@ var emitEvent = function (tx, evt) {
                         return "#" + wolf.name + "(" + getWolfAttr('alpha', wolf) + ")";
                     return "#" + wolf.name;
                 });
-                embed.setDescription('~~' + tokens.join(' '));
+                embed.setDescription(desc.join('\r\n') + tokens.join('\r'));
                 return { msg: { content: "TO: " + showAddress(tx.to, false), embeds: [embed], components: [row] }, tokenIds: tokenIds };
             };
             var send = getMsg();
