@@ -155,7 +155,9 @@ var emitEvent = function (tx, evt) {
             return "continue";
         if (!ChannelCache[id])
             ChannelCache[id] = client.channels.fetch(id);
+        console.log(id, ChannelCache[id]);
         ChannelCache[id].then(function (ch) {
+            console.log(id, ch);
             var getMsg = function () {
                 var _a;
                 var tokenIds = [];
