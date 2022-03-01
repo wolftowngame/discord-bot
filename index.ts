@@ -53,6 +53,7 @@ client.once('ready', () => {
 client.on('error', (msg) => console.log('error:', msg));
 
 client.on('messageCreate', async (msg) => {
+  console.log('messageCreate', msg.channelId);
   const bot = client.user!;
   const from = msg.author;
   if (from.id === bot.id) return;
@@ -316,6 +317,7 @@ const txCache: Record<string, boolean> = {};
     }
   };
 
+  await sleep(10000);
   while (true) {
     console.log('lastBlock', db.lastBlock);
     await query();

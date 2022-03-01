@@ -93,6 +93,7 @@ client.on('error', function (msg) { return console.log('error:', msg); });
 client.on('messageCreate', function (msg) { return __awaiter(void 0, void 0, void 0, function () {
     var bot, from, botWasMentioned, add, event_1, del, event_2;
     return __generator(this, function (_a) {
+        console.log('messageCreate', msg.channelId);
         bot = client.user;
         from = msg.author;
         if (from.id === bot.id)
@@ -413,18 +414,21 @@ var txCache = {};
                         }
                     });
                 }); };
-                _a.label = 1;
+                return [4 /*yield*/, sleep(10000)];
             case 1:
-                if (!true) return [3 /*break*/, 4];
+                _a.sent();
+                _a.label = 2;
+            case 2:
+                if (!true) return [3 /*break*/, 5];
                 console.log('lastBlock', db.lastBlock);
                 return [4 /*yield*/, query()];
-            case 2:
-                _a.sent();
-                return [4 /*yield*/, sleep(3000)];
             case 3:
                 _a.sent();
-                return [3 /*break*/, 1];
-            case 4: return [2 /*return*/];
+                return [4 /*yield*/, sleep(3000)];
+            case 4:
+                _a.sent();
+                return [3 /*break*/, 2];
+            case 5: return [2 /*return*/];
         }
     });
 }); })();
