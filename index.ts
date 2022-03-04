@@ -303,7 +303,7 @@ const txCache: Record<string, boolean> = {};
 
           if (MINT) {
             const fromZero = parseLog.filter((i) => i && i.name === 'Transfer' && i.args.from === ethers.constants.AddressZero);
-            const loseNum = parseLog.filter((i) => i && i.name === 'Transfer' && [tx.from, Barn.address].includes(i.args.to));
+            const loseNum = parseLog.filter((i) => i && i.name === 'TokenStolen');
             MINT.message.push({ type: '\r\nmint', content: fromZero.length + '' });
             MINT.message.push({ type: '\r\nlose', content: loseNum.length + '' });
             parseLog.forEach((i) => {
