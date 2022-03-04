@@ -19,9 +19,8 @@ try {
 const dbSave = () => {
   fs.writeFile('./db.json', JSON.stringify(db), () => {});
 };
-const Wolf = new Contract('0xE686133662190070c4A4Bea477fCF48dF35F5b2c', require('./Wolf.json'), StaticWeb3Read);
-const Barn = new Contract('0x58eaBB38cc9D68bEA8E645B0f5Ec741C82f2871B', require('./Barn.json'), StaticWeb3Read);
-const BarnBUG = new Contract('0x386500b851CA1aF027247fa8Ab3A9dDd40753813', require('./Barn.json'), StaticWeb3Read);
+const Wolf = new Contract('0x14f112d437271e01664bb3680BcbAe2f6A3Fb5fB', require('./Wolf.json'), StaticWeb3Read);
+const Barn = new Contract('0x10A6DC9fb8F8794d1Dc7D16B035c40923B148AA4', require('./Barn.json'), StaticWeb3Read);
 const Wool = new Contract('0xAA15535fd352F60B937B4e59D8a2D52110A419dD', require('./ERC20.json'), StaticWeb3Read);
 const Milk = new Contract('0x60Ca032Ba8057FedB98F6A5D9ba0242AD2182177', require('./ERC20.json'), StaticWeb3Read);
 
@@ -181,16 +180,10 @@ const emitEvent = (tx: providers.TransactionResponse, evt = [defaultDvt]) => {
       const needAwait = send.tokenIds.filter((t) => !TokenInfoCache[t]);
       ch.send(send.msg).then(async (msg) => {
         if (needAwait.length === 0) return;
-        await Promise.all(
-          needAwait.map((token) => {
-            if (token in TokenInfoReqCache) return TokenInfoReqCache[token];
-            TokenInfoReqCache[token] = getAniJSON(`https://app.wolftown.world/animals/${token}`).then((wolf) => {
-              TokenInfoCache[token] = wolf;
-              return wolf;
-            });
-            return TokenInfoReqCache[token];
-          })
-        );
+        const ress = await getAniJSON(`https://app.wolftown.world/animals?ids=${encodeURIComponent(JSON.stringify(needAwait))}`);
+        needAwait.forEach((id) => {
+          TokenInfoCache[id] = ress[id];
+        });
         msg.edit(getMsg().msg);
       });
     });
@@ -209,7 +202,7 @@ interface Wolf {
   imageSmall: string;
   name: string;
 }
-const getAniJSON = async (uri: string): Promise<Wolf> => {
+const getAniJSON = async (uri: string): Promise<Record<string, Wolf>> => {
   const res = await axios.get(uri);
   return res.data;
 };
