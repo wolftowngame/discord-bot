@@ -30,7 +30,7 @@ const AddressTranslate: Record<string, string> = {
 };
 
 const client = new Client({
-  intents: [Intents.FLAGS.GUILD_MESSAGES],
+  intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES],
 });
 
 const WatchList = (db.WatchList = db.WatchList || {});

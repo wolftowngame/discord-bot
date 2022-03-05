@@ -58,9 +58,8 @@ finally {
 var dbSave = function () {
     fs.writeFile('./db.json', JSON.stringify(db), function () { });
 };
-var Wolf = new ethers_1.Contract('0xE686133662190070c4A4Bea477fCF48dF35F5b2c', require('./Wolf.json'), StaticWeb3Read);
-var Barn = new ethers_1.Contract('0x58eaBB38cc9D68bEA8E645B0f5Ec741C82f2871B', require('./Barn.json'), StaticWeb3Read);
-var BarnBUG = new ethers_1.Contract('0x386500b851CA1aF027247fa8Ab3A9dDd40753813', require('./Barn.json'), StaticWeb3Read);
+var Wolf = new ethers_1.Contract('0x14f112d437271e01664bb3680BcbAe2f6A3Fb5fB', require('./Wolf.json'), StaticWeb3Read);
+var Barn = new ethers_1.Contract('0x10A6DC9fb8F8794d1Dc7D16B035c40923B148AA4', require('./Barn.json'), StaticWeb3Read);
 var Wool = new ethers_1.Contract('0xAA15535fd352F60B937B4e59D8a2D52110A419dD', require('./ERC20.json'), StaticWeb3Read);
 var Milk = new ethers_1.Contract('0x60Ca032Ba8057FedB98F6A5D9ba0242AD2182177', require('./ERC20.json'), StaticWeb3Read);
 var AddressTranslate = (_a = {},
@@ -68,7 +67,7 @@ var AddressTranslate = (_a = {},
     _a[Barn.address] = 'Barn',
     _a);
 var client = new discord_js_1.Client({
-    intents: [discord_js_1.Intents.FLAGS.GUILD_MESSAGES]
+    intents: [discord_js_1.Intents.FLAGS.GUILD_MESSAGES, discord_js_1.Intents.FLAGS.DIRECT_MESSAGES]
 });
 var WatchList = (db.WatchList = db.WatchList || {});
 var cmds = ['MINT', 'Unknown', 'Barn-UNSTAKE', 'STAKE-MILK', 'STAKE-WOOL', 'STAKE-WOLF', 'STOLEN'];
@@ -91,7 +90,7 @@ client.once('ready', function () {
     console.log("Logged in as " + client.user.tag + "!");
 });
 client.on('error', function (msg) { return console.log('error:', msg); });
-client.on('messageCreate', function (msg) { return __awaiter(void 0, void 0, void 0, function () {
+var MessageWatch = function (msg) { return __awaiter(void 0, void 0, void 0, function () {
     var bot, from, botWasMentioned, add, event_1, del, event_2, pub, cid;
     return __generator(this, function (_a) {
         console.log('messageCreate', msg.channelId);
@@ -140,7 +139,9 @@ client.on('messageCreate', function (msg) { return __awaiter(void 0, void 0, voi
         }
         return [2 /*return*/];
     });
-}); });
+}); };
+client.on('message', MessageWatch);
+client.on('messageCreate', MessageWatch);
 client.login(BOT_TOKEN);
 var defaultDvt = {
     name: '',
@@ -220,22 +221,18 @@ var emitEvent = function (tx, evt) {
             var send = getMsg();
             var needAwait = send.tokenIds.filter(function (t) { return !TokenInfoCache[t]; });
             ch.send(send.msg).then(function (msg) { return __awaiter(void 0, void 0, void 0, function () {
+                var ress;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             if (needAwait.length === 0)
                                 return [2 /*return*/];
-                            return [4 /*yield*/, Promise.all(needAwait.map(function (token) {
-                                    if (token in TokenInfoReqCache)
-                                        return TokenInfoReqCache[token];
-                                    TokenInfoReqCache[token] = getAniJSON("https://app.wolftown.world/animals/" + token).then(function (wolf) {
-                                        TokenInfoCache[token] = wolf;
-                                        return wolf;
-                                    });
-                                    return TokenInfoReqCache[token];
-                                }))];
+                            return [4 /*yield*/, getAniJSON("https://app.wolftown.world/animals?ids=" + encodeURIComponent(JSON.stringify(needAwait)))];
                         case 1:
-                            _a.sent();
+                            ress = _a.sent();
+                            needAwait.forEach(function (id) {
+                                TokenInfoCache[id] = ress[id];
+                            });
                             msg.edit(getMsg().msg);
                             return [2 /*return*/];
                     }
@@ -311,20 +308,20 @@ var txCache = {};
                                     // const transferData = txCacheMap[item.transactionHash];
                                 });
                                 _loop_2 = function (msg) {
-                                    var _b, tx_1, rtx, res_1, message_1, mainEvt, MINT_1, parseLog, fromZero, loseNum, e_2;
+                                    var _b, tx, rtx, res_1, message_1, mainEvt, MINT_1, parseLog, fromZero, loseNum, e_2;
                                     return __generator(this, function (_c) {
                                         switch (_c.label) {
                                             case 0:
                                                 _c.trys.push([0, 2, , 3]);
                                                 return [4 /*yield*/, Promise.all([StaticWeb3Read.getTransaction(msg.tx), StaticWeb3Read.getTransactionReceipt(msg.tx)])];
                                             case 1:
-                                                _b = _c.sent(), tx_1 = _b[0], rtx = _b[1];
+                                                _b = _c.sent(), tx = _b[0], rtx = _b[1];
                                                 res_1 = void 0;
-                                                if (tx_1.to === Wolf.address) {
-                                                    res_1 = Wolf.interface.parseTransaction(tx_1);
+                                                if (tx.to === Wolf.address) {
+                                                    res_1 = Wolf.interface.parseTransaction(tx);
                                                 }
-                                                else if (tx_1.to === Barn.address) {
-                                                    res_1 = Barn.interface.parseTransaction(tx_1);
+                                                else if (tx.to === Barn.address) {
+                                                    res_1 = Barn.interface.parseTransaction(tx);
                                                 }
                                                 else {
                                                     res_1 = null;
@@ -333,8 +330,8 @@ var txCache = {};
                                                     {
                                                         name: res_1 ? res_1.name : 'Unknown',
                                                         message: [
-                                                            { type: 'from', content: tx_1.from },
-                                                            { type: 'to', content: tx_1.to },
+                                                            { type: 'from', content: tx.from },
+                                                            { type: 'to', content: tx.to },
                                                         ]
                                                     },
                                                 ];
@@ -378,7 +375,7 @@ var txCache = {};
                                                 });
                                                 if (MINT_1) {
                                                     fromZero = parseLog.filter(function (i) { return i && i.name === 'Transfer' && i.args.from === ethers_1.ethers.constants.AddressZero; });
-                                                    loseNum = parseLog.filter(function (i) { return i && i.name === 'Transfer' && [tx_1.from, Barn.address].includes(i.args.to); });
+                                                    loseNum = parseLog.filter(function (i) { return i && i.name === 'TokenStolen'; });
                                                     MINT_1.message.push({ type: '\r\nmint', content: fromZero.length + '' });
                                                     MINT_1.message.push({ type: '\r\nlose', content: loseNum.length + '' });
                                                     parseLog.forEach(function (i) {
@@ -389,7 +386,7 @@ var txCache = {};
                                                         }
                                                     });
                                                 }
-                                                emitEvent(tx_1, message_1);
+                                                emitEvent(tx, message_1);
                                                 return [3 /*break*/, 3];
                                             case 2:
                                                 e_2 = _c.sent();
