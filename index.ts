@@ -64,7 +64,7 @@ const MessageWatch: (message: Message<boolean>) => Awaitable<void> = async (msg)
 
   if (botWasMentioned && AdminUser.includes(from.id)) {
     WatchList[msg.channelId] = WatchList[msg.channelId] || [];
-    const matchd = msg.content.trim().match(/cmd:(.*)$/);
+    const matchd = msg.content.trim().match(/cmd\:(.*)$/);
     if (!matchd) return;
     const want = parseMsg(matchd[1]);
     if (want.add) {

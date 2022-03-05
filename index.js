@@ -101,7 +101,7 @@ var MessageWatch = function (msg) { return __awaiter(void 0, void 0, void 0, fun
         botWasMentioned = msg.mentions.users.find(function (mentionedUser) { return mentionedUser.id === bot.id; });
         if (botWasMentioned && AdminUser.includes(from.id)) {
             WatchList[msg.channelId] = WatchList[msg.channelId] || [];
-            matchd = msg.content.trim().match(/cmd:(.*)$/);
+            matchd = msg.content.trim().match(/cmd\:(.*)$/);
             if (!matchd)
                 return [2 /*return*/];
             want = parseMsg(matchd[1]);
