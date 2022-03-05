@@ -91,7 +91,7 @@ client.once('ready', function () {
 });
 client.on('error', function (msg) { return console.log('error:', msg); });
 var MessageWatch = function (msg) { return __awaiter(void 0, void 0, void 0, function () {
-    var bot, from, botWasMentioned, add, event_1, del, event_2, pub, cid;
+    var bot, from, botWasMentioned, matchd, want, event_1, to, event_2, to, cid;
     return __generator(this, function (_a) {
         console.log('messageCreate', msg.channelId);
         bot = client.user;
@@ -101,34 +101,37 @@ var MessageWatch = function (msg) { return __awaiter(void 0, void 0, void 0, fun
         botWasMentioned = msg.mentions.users.find(function (mentionedUser) { return mentionedUser.id === bot.id; });
         if (botWasMentioned && AdminUser.includes(from.id)) {
             WatchList[msg.channelId] = WatchList[msg.channelId] || [];
-            add = msg.content.trim().match(/add\:(.*)$/);
-            if (add) {
-                event_1 = add[1];
+            matchd = msg.content.trim().match(/cmd:(.*)$/);
+            if (!matchd)
+                return [2 /*return*/];
+            want = parseMsg(matchd[1]);
+            if (want.add) {
+                event_1 = want.add;
                 if (!cmds.includes(event_1))
                     return [2 /*return*/];
-                if (WatchList[msg.channelId].includes(event_1)) {
+                to = msg.channelId || want.id;
+                if (WatchList[to].includes(event_1)) {
                     msg.channel.send('Already registered');
                     return [2 /*return*/];
                 }
-                WatchList[msg.channelId].push(event_1);
+                WatchList[to].push(event_1);
                 msg.channel.send('Successful');
                 dbSave();
                 return [2 /*return*/];
             }
-            del = msg.content.trim().match(/del\:(.*)$/);
-            if (del) {
-                event_2 = del[1];
+            if (want.del) {
+                event_2 = want.del;
                 if (!cmds.includes(event_2))
                     return [2 /*return*/];
-                if (WatchList[msg.channelId].includes(event_2))
-                    WatchList[msg.channelId].splice(WatchList[msg.channelId].indexOf(event_2), 1);
+                to = msg.channelId || want.id;
+                if (WatchList[to].includes(event_2))
+                    WatchList[to].splice(WatchList[to].indexOf(event_2), 1);
                 msg.channel.send('Successful');
                 dbSave();
                 return [2 /*return*/];
             }
-            pub = msg.content.trim().match(/pub\:(.*)$/);
-            if (pub) {
-                cid = pub[1];
+            if (want.pub) {
+                cid = want.pub;
                 client.channels.fetch(cid).then(function (ch) {
                     if (ch)
                         ch.send('Hello!');
@@ -303,6 +306,18 @@ function AddressShortString(address) {
     return address.replace(/(0x[0-9a-zA-Z]{4})(.*?)([0-9a-zA-Z]{4})$/, '$1...$3');
 }
 var NumTrue = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+var parseMsg = function (msg) {
+    msg = msg || '';
+    var args = msg.split(',');
+    var map = {};
+    args.forEach(function (str) {
+        var cmd = str.split(':');
+        if (cmd.length < 2)
+            return;
+        map[cmd[0]] = cmd[1];
+    });
+    return map;
+};
 var txCache = {};
 (function () { return __awaiter(void 0, void 0, void 0, function () {
     var query;
@@ -310,7 +325,7 @@ var txCache = {};
         switch (_a.label) {
             case 0:
                 query = function () { return __awaiter(void 0, void 0, void 0, function () {
-                    var res, adds_2, txCacheMap_1, cccc_1, _loop_2, _i, adds_1, msg, e_2;
+                    var res, adds_2, txCacheMap_1, _loop_2, _i, adds_1, msg, e_2;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
@@ -320,7 +335,6 @@ var txCache = {};
                                 res = _a.sent();
                                 adds_2 = [];
                                 txCacheMap_1 = {};
-                                cccc_1 = 0;
                                 res.forEach(function (item) {
                                     if (item.blockNumber <= db.lastBlock)
                                         return;
@@ -328,8 +342,7 @@ var txCache = {};
                                     var key = item.transactionHash + item.logIndex;
                                     if (txCache[key])
                                         return;
-                                    cccc_1++;
-                                    if (cccc_1 > 100)
+                                    if (adds_2.length > 100)
                                         return;
                                     txCache[key] = true;
                                     if (item.event !== 'Transfer' && item.event !== 'TokenStolen')

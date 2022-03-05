@@ -64,35 +64,37 @@ const MessageWatch: (message: Message<boolean>) => Awaitable<void> = async (msg)
 
   if (botWasMentioned && AdminUser.includes(from.id)) {
     WatchList[msg.channelId] = WatchList[msg.channelId] || [];
-    const add = msg.content.trim().match(/add\:(.*)$/);
-    if (add) {
-      const event = add[1];
+    const matchd = msg.content.trim().match(/cmd:(.*)$/);
+    if (!matchd) return;
+    const want = parseMsg(matchd[1]);
+    if (want.add) {
+      const event = want.add;
       if (!cmds.includes(event)) return;
 
-      if (WatchList[msg.channelId].includes(event)) {
+      const to = msg.channelId || want.id;
+      if (WatchList[to].includes(event)) {
         msg.channel.send('Already registered');
         return;
       }
 
-      WatchList[msg.channelId].push(event);
+      WatchList[to].push(event);
       msg.channel.send('Successful');
       dbSave();
       return;
     }
 
-    const del = msg.content.trim().match(/del\:(.*)$/);
-    if (del) {
-      const event = del[1];
+    if (want.del) {
+      const event = want.del;
       if (!cmds.includes(event)) return;
-      if (WatchList[msg.channelId].includes(event)) WatchList[msg.channelId].splice(WatchList[msg.channelId].indexOf(event), 1);
+      const to = msg.channelId || want.id;
+      if (WatchList[to].includes(event)) WatchList[to].splice(WatchList[to].indexOf(event), 1);
       msg.channel.send('Successful');
       dbSave();
       return;
     }
 
-    const pub = msg.content.trim().match(/pub\:(.*)$/);
-    if (pub) {
-      const cid = pub[1];
+    if (want.pub) {
+      const cid = want.pub;
       client.channels.fetch(cid).then((ch) => {
         if (ch) (ch as TextChannel).send('Hello!');
       });
@@ -235,6 +237,18 @@ function AddressShortString(address: string) {
 
 const NumTrue: any = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 
+const parseMsg = (msg: string) => {
+  msg = msg || '';
+  const args = msg.split(',');
+  const map: Record<string, string> = {};
+  args.forEach((str) => {
+    const cmd = str.split(':');
+    if (cmd.length < 2) return;
+    map[cmd[0]] = cmd[1];
+  });
+  return map;
+};
+
 const txCache: Record<string, boolean> = {};
 (async () => {
   const query = async () => {
@@ -242,14 +256,12 @@ const txCache: Record<string, boolean> = {};
       const res = await Wolf.queryFilter({}, (-30 * 60) / 3, 'latest');
       const adds: { tx: string; key: string }[] = [];
       const txCacheMap: Record<string, typeof adds[0]> = {};
-      let cccc = 0;
       res.forEach((item) => {
         if (item.blockNumber <= db.lastBlock) return;
         db.lastBlock = item.blockNumber;
         const key = item.transactionHash + item.logIndex;
         if (txCache[key]) return;
-        cccc++;
-        if (cccc > 100) return;
+        if (adds.length > 100) return;
         txCache[key] = true;
         if (item.event !== 'Transfer' && item.event !== 'TokenStolen') return;
         if (!txCacheMap[item.transactionHash]) {
