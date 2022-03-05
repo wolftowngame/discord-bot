@@ -60,11 +60,13 @@ var dbSave = function () {
 };
 var Wolf = new ethers_1.Contract('0x14f112d437271e01664bb3680BcbAe2f6A3Fb5fB', require('./Wolf.json'), StaticWeb3Read);
 var Barn = new ethers_1.Contract('0x10A6DC9fb8F8794d1Dc7D16B035c40923B148AA4', require('./Barn.json'), StaticWeb3Read);
+var Rescue = new ethers_1.Contract('0xCe487D0Ab195D28FE18D5279B042498f84eb051F', require('./Barn.json'), StaticWeb3Read);
 var Wool = new ethers_1.Contract('0xAA15535fd352F60B937B4e59D8a2D52110A419dD', require('./ERC20.json'), StaticWeb3Read);
 var Milk = new ethers_1.Contract('0x60Ca032Ba8057FedB98F6A5D9ba0242AD2182177', require('./ERC20.json'), StaticWeb3Read);
 var AddressTranslate = (_a = {},
     _a[Wolf.address] = 'WolfTown',
     _a[Barn.address] = 'Barn',
+    _a[Rescue.address] = 'Rescue',
     _a);
 var client = new discord_js_1.Client({
     intents: [discord_js_1.Intents.FLAGS.GUILD_MESSAGES, discord_js_1.Intents.FLAGS.DIRECT_MESSAGES]
@@ -140,7 +142,6 @@ var MessageWatch = function (msg) { return __awaiter(void 0, void 0, void 0, fun
         return [2 /*return*/];
     });
 }); };
-client.on('message', MessageWatch);
 client.on('messageCreate', MessageWatch);
 client.login(BOT_TOKEN);
 var defaultDvt = {
@@ -221,20 +222,48 @@ var emitEvent = function (tx, evt) {
             var send = getMsg();
             var needAwait = send.tokenIds.filter(function (t) { return !TokenInfoCache[t]; });
             ch.send(send.msg).then(function (msg) { return __awaiter(void 0, void 0, void 0, function () {
-                var ress;
+                var editMsg, times, e_1;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             if (needAwait.length === 0)
                                 return [2 /*return*/];
-                            return [4 /*yield*/, getAniJSON("https://app.wolftown.world/animals?ids=" + encodeURIComponent(JSON.stringify(needAwait)))];
+                            editMsg = function () { return __awaiter(void 0, void 0, void 0, function () {
+                                var ress;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, getAniJSON("https://app.wolftown.world/animals?ids=" + encodeURIComponent(JSON.stringify(needAwait)))];
+                                        case 1:
+                                            ress = _a.sent();
+                                            needAwait.forEach(function (id) {
+                                                TokenInfoCache[id] = ress[id];
+                                            });
+                                            msg.edit(getMsg().msg);
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); };
+                            times = 0;
+                            _a.label = 1;
                         case 1:
-                            ress = _a.sent();
-                            needAwait.forEach(function (id) {
-                                TokenInfoCache[id] = ress[id];
-                            });
-                            msg.edit(getMsg().msg);
-                            return [2 /*return*/];
+                            if (!(times < 10)) return [3 /*break*/, 7];
+                            _a.label = 2;
+                        case 2:
+                            _a.trys.push([2, 4, , 6]);
+                            return [4 /*yield*/, editMsg()];
+                        case 3:
+                            _a.sent();
+                            times = 100;
+                            return [3 /*break*/, 6];
+                        case 4:
+                            e_1 = _a.sent();
+                            return [4 /*yield*/, sleep(5000)];
+                        case 5:
+                            _a.sent();
+                            times++;
+                            return [3 /*break*/, 6];
+                        case 6: return [3 /*break*/, 1];
+                        case 7: return [2 /*return*/];
                     }
                 });
             }); });
@@ -281,7 +310,7 @@ var txCache = {};
         switch (_a.label) {
             case 0:
                 query = function () { return __awaiter(void 0, void 0, void 0, function () {
-                    var res, adds_2, txCacheMap_1, _loop_2, _i, adds_1, msg, e_1;
+                    var res, adds_2, txCacheMap_1, _loop_2, _i, adds_1, msg, e_2;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
@@ -308,7 +337,7 @@ var txCache = {};
                                     // const transferData = txCacheMap[item.transactionHash];
                                 });
                                 _loop_2 = function (msg) {
-                                    var _b, tx, rtx, res_1, message_1, mainEvt, MINT_1, parseLog, fromZero, loseNum, e_2;
+                                    var _b, tx, rtx, res_1, name_1, message_1, mainEvt, MINT_1, parseLog, fromZero, loseNum, e_3;
                                     return __generator(this, function (_c) {
                                         switch (_c.label) {
                                             case 0:
@@ -326,9 +355,16 @@ var txCache = {};
                                                 else {
                                                     res_1 = null;
                                                 }
+                                                name_1 = 'Unknow';
+                                                if (res_1) {
+                                                    name_1 = res_1.name;
+                                                }
+                                                if (tx.to === Rescue.address) {
+                                                    name_1 = 'Rescue';
+                                                }
                                                 message_1 = [
                                                     {
-                                                        name: res_1 ? res_1.name : 'Unknown',
+                                                        name: name_1,
                                                         message: [
                                                             { type: 'from', content: tx.from },
                                                             { type: 'to', content: tx.to },
@@ -389,8 +425,8 @@ var txCache = {};
                                                 emitEvent(tx, message_1);
                                                 return [3 /*break*/, 3];
                                             case 2:
-                                                e_2 = _c.sent();
-                                                console.error('send msg err', e_2);
+                                                e_3 = _c.sent();
+                                                console.error('send msg err', e_3);
                                                 return [3 /*break*/, 3];
                                             case 3: return [2 /*return*/];
                                         }
@@ -412,8 +448,8 @@ var txCache = {};
                                 dbSave();
                                 return [3 /*break*/, 8];
                             case 6:
-                                e_1 = _a.sent();
-                                console.log('e', e_1);
+                                e_2 = _a.sent();
+                                console.log('e', e_2);
                                 return [3 /*break*/, 8];
                             case 7: return [7 /*endfinally*/];
                             case 8: return [2 /*return*/];

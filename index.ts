@@ -21,12 +21,14 @@ const dbSave = () => {
 };
 const Wolf = new Contract('0x14f112d437271e01664bb3680BcbAe2f6A3Fb5fB', require('./Wolf.json'), StaticWeb3Read);
 const Barn = new Contract('0x10A6DC9fb8F8794d1Dc7D16B035c40923B148AA4', require('./Barn.json'), StaticWeb3Read);
+const Rescue = new Contract('0xCe487D0Ab195D28FE18D5279B042498f84eb051F', require('./Barn.json'), StaticWeb3Read);
 const Wool = new Contract('0xAA15535fd352F60B937B4e59D8a2D52110A419dD', require('./ERC20.json'), StaticWeb3Read);
 const Milk = new Contract('0x60Ca032Ba8057FedB98F6A5D9ba0242AD2182177', require('./ERC20.json'), StaticWeb3Read);
 
 const AddressTranslate: Record<string, string> = {
   [Wolf.address]: 'WolfTown',
   [Barn.address]: 'Barn',
+  [Rescue.address]: 'Rescue',
 };
 
 const client = new Client({
@@ -100,7 +102,6 @@ const MessageWatch: (message: Message<boolean>) => Awaitable<void> = async (msg)
     return;
   }
 };
-client.on('message', MessageWatch);
 client.on('messageCreate', MessageWatch);
 
 client.login(BOT_TOKEN);
@@ -182,11 +183,23 @@ const emitEvent = (tx: providers.TransactionResponse, evt = [defaultDvt]) => {
       const needAwait = send.tokenIds.filter((t) => !TokenInfoCache[t]);
       ch.send(send.msg).then(async (msg) => {
         if (needAwait.length === 0) return;
-        const ress = await getAniJSON(`https://app.wolftown.world/animals?ids=${encodeURIComponent(JSON.stringify(needAwait))}`);
-        needAwait.forEach((id) => {
-          TokenInfoCache[id] = ress[id];
-        });
-        msg.edit(getMsg().msg);
+        const editMsg = async () => {
+          const ress = await getAniJSON(`https://app.wolftown.world/animals?ids=${encodeURIComponent(JSON.stringify(needAwait))}`);
+          needAwait.forEach((id) => {
+            TokenInfoCache[id] = ress[id];
+          });
+          msg.edit(getMsg().msg);
+        };
+        let times = 0;
+        while (times < 10) {
+          try {
+            await editMsg();
+            times = 100;
+          } catch (e) {
+            await sleep(5000);
+            times++;
+          }
+        }
       });
     });
   }
@@ -253,9 +266,16 @@ const txCache: Record<string, boolean> = {};
           } else {
             res = null;
           }
+          let name = 'Unknow';
+          if (res) {
+            name = res.name;
+          }
+          if (tx.to === Rescue.address) {
+            name = 'Rescue';
+          }
           const message = [
             {
-              name: res ? res.name : 'Unknown',
+              name: name,
               message: [
                 { type: 'from', content: tx.from },
                 { type: 'to', content: tx.to! },
