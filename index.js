@@ -193,10 +193,12 @@ var emitEvent = function (tx, evt) {
                 var desc = [];
                 evts.forEach(function (e) {
                     var contents = [];
-                    e.message.map(function (s) {
-                        if (s.type === 'tokenId' && !tokenIds.includes(s.content)) {
+                    e.message.forEach(function (s) {
+                        if (['tokenId', 'tokenId__'].includes(s.type) && !tokenIds.includes(s.content)) {
                             tokenIds.push(s.content);
                         }
+                        if (s.type === 'tokenId__')
+                            return;
                         if (!btns[s.content] && Object.keys(btns).length < 6 && ethers_1.ethers.utils.isAddress(s.content)) {
                             btns[s.content] = true;
                             row.addComponents(new discord_js_1.MessageButton({ label: "" + showAddress(s.content), style: 'LINK', url: "https://bscscan.com/address/" + s.content }));
@@ -420,9 +422,9 @@ var txCache = {};
                                                             return;
                                                         if (i.args) {
                                                             if (i.args.tokenId)
-                                                                MINT_1.message.push({ type: 'tokenId', content: i.args.tokenId.toString() });
+                                                                MINT_1.message.push({ type: 'tokenId__', content: i.args.tokenId.toString() });
                                                             if (i.args._tokenId)
-                                                                MINT_1.message.push({ type: 'tokenId', content: i.args._tokenId.toString() });
+                                                                MINT_1.message.push({ type: 'tokenId__', content: i.args._tokenId.toString() });
                                                         }
                                                         if (i.name === 'TokenStolen') {
                                                             MINT_1.message.push({ type: '\r\nSTOLEN', content: showAddress(i.args._address) + " #" + i.args._tokenId.toString() });

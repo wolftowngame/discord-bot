@@ -154,10 +154,11 @@ const emitEvent = (tx: providers.TransactionResponse, evt = [defaultDvt]) => {
         let desc: string[] = [];
         evts.forEach((e) => {
           const contents: string[] = [];
-          e.message.map((s) => {
-            if (s.type === 'tokenId' && !tokenIds.includes(s.content)) {
+          e.message.forEach((s) => {
+            if (['tokenId', 'tokenId__'].includes(s.type) && !tokenIds.includes(s.content)) {
               tokenIds.push(s.content);
             }
+            if (s.type === 'tokenId__') return;
             if (!btns[s.content] && Object.keys(btns).length < 6 && ethers.utils.isAddress(s.content)) {
               btns[s.content] = true;
               row.addComponents(new MessageButton({ label: `${showAddress(s.content)}`, style: 'LINK', url: `https://bscscan.com/address/${s.content}` }));
@@ -325,8 +326,8 @@ const txCache: Record<string, boolean> = {};
               if (!i) return;
               if (!MINT) return;
               if (i.args) {
-                if (i.args.tokenId) MINT.message.push({ type: 'tokenId', content: i.args.tokenId.toString() });
-                if (i.args._tokenId) MINT.message.push({ type: 'tokenId', content: i.args._tokenId.toString() });
+                if (i.args.tokenId) MINT.message.push({ type: 'tokenId__', content: i.args.tokenId.toString() });
+                if (i.args._tokenId) MINT.message.push({ type: 'tokenId__', content: i.args._tokenId.toString() });
               }
               if (i.name === 'TokenStolen') {
                 MINT.message.push({ type: '\r\nSTOLEN', content: `${showAddress(i.args._address)} #${i.args._tokenId.toString()}` });
