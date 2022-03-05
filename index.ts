@@ -1,6 +1,6 @@
 const fs = require('fs');
 const BOT_TOKEN = fs.existsSync('.discord') ? fs.readFileSync('.discord').toString().trim() : '';
-import { Client, Intents, MessageActionRow, MessageAttachment, MessageButton, MessageEmbed, TextChannel } from 'discord.js';
+import { Awaitable, Client, Intents, Message, MessageActionRow, MessageAttachment, MessageButton, MessageEmbed, TextChannel } from 'discord.js';
 import axios, { Axios } from 'axios';
 import { providers, Contract, BigNumber, ethers } from 'ethers';
 const StaticWeb3Read = new providers.JsonRpcProvider('https://bsc-dataseed.binance.org/');
@@ -53,7 +53,7 @@ client.once('ready', () => {
 });
 client.on('error', (msg) => console.log('error:', msg));
 
-client.on('messageCreate', async (msg) => {
+const MessageWatch: (message: Message<boolean>) => Awaitable<void> = async (msg) => {
   console.log('messageCreate', msg.channelId);
   const bot = client.user!;
   const from = msg.author;
@@ -99,7 +99,9 @@ client.on('messageCreate', async (msg) => {
     msg.channel.send(WatchList[msg.channelId].join(';'));
     return;
   }
-});
+};
+client.on('message', MessageWatch);
+client.on('messageCreate', MessageWatch);
 
 client.login(BOT_TOKEN);
 
