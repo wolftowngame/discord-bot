@@ -41,10 +41,10 @@ let cmds = ['MINT', 'Unknown', 'Barn-UNSTAKE', 'STAKE-MILK', 'STAKE-WOOL', 'STAK
 //   if (cmds.includes(it.name)) return;
 //   cmds.push(it.name);
 // });
-Barn.interface.fragments.forEach((it) => {
-  if (cmds.includes(it.name)) return;
-  cmds.push('Barn-' + it.name);
-});
+// Barn.interface.fragments.forEach((it) => {
+//   if (cmds.includes(it.name)) return;
+//   cmds.push('Barn-' + it.name);
+// });
 cmds = cmds.filter((i) => i);
 const testCid = '947753505844760607';
 WatchList[testCid] = cmds;
