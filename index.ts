@@ -36,11 +36,11 @@ const client = new Client({
 });
 
 const WatchList = (db.WatchList = db.WatchList || {});
-let cmds = ['MINT', 'Unknown', 'Barn-UNSTAKE', 'STAKE-MILK', 'STAKE-WOOL', 'STAKE-WOLF', 'STOLEN'];
-Wolf.interface.fragments.forEach((it) => {
-  if (cmds.includes(it.name)) return;
-  cmds.push(it.name);
-});
+let cmds = ['MINT', 'Unknown', 'Barn-UNSTAKE', 'STAKE-MILK', 'STAKE-WOOL', 'STAKE-WOLF', 'STOLEN', 'TokenStolen'];
+// Wolf.interface.fragments.forEach((it) => {
+//   if (cmds.includes(it.name)) return;
+//   cmds.push(it.name);
+// });
 Barn.interface.fragments.forEach((it) => {
   if (cmds.includes(it.name)) return;
   cmds.push('Barn-' + it.name);
@@ -323,7 +323,12 @@ const txCache: Record<string, boolean> = {};
             MINT.message.push({ type: '\r\nlose', content: loseNum.length + '' });
             parseLog.forEach((i) => {
               if (!i) return;
-              if (i.name === 'TokenStolen' && MINT) {
+              if (!MINT) return;
+              if (i.args) {
+                if (i.args.tokenId) MINT.message.push({ type: 'tokenId', content: i.args.tokenId.toString() });
+                if (i.args._tokenId) MINT.message.push({ type: 'tokenId', content: i.args._tokenId.toString() });
+              }
+              if (i.name === 'TokenStolen') {
                 MINT.message.push({ type: '\r\nSTOLEN', content: `${showAddress(i.args._address)} #${i.args._tokenId.toString()}` });
               }
             });

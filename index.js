@@ -72,12 +72,11 @@ var client = new discord_js_1.Client({
     intents: [discord_js_1.Intents.FLAGS.GUILD_MESSAGES, discord_js_1.Intents.FLAGS.DIRECT_MESSAGES]
 });
 var WatchList = (db.WatchList = db.WatchList || {});
-var cmds = ['MINT', 'Unknown', 'Barn-UNSTAKE', 'STAKE-MILK', 'STAKE-WOOL', 'STAKE-WOLF', 'STOLEN'];
-Wolf.interface.fragments.forEach(function (it) {
-    if (cmds.includes(it.name))
-        return;
-    cmds.push(it.name);
-});
+var cmds = ['MINT', 'Unknown', 'Barn-UNSTAKE', 'STAKE-MILK', 'STAKE-WOOL', 'STAKE-WOLF', 'STOLEN', 'TokenStolen'];
+// Wolf.interface.fragments.forEach((it) => {
+//   if (cmds.includes(it.name)) return;
+//   cmds.push(it.name);
+// });
 Barn.interface.fragments.forEach(function (it) {
     if (cmds.includes(it.name))
         return;
@@ -417,7 +416,15 @@ var txCache = {};
                                                     parseLog.forEach(function (i) {
                                                         if (!i)
                                                             return;
-                                                        if (i.name === 'TokenStolen' && MINT_1) {
+                                                        if (!MINT_1)
+                                                            return;
+                                                        if (i.args) {
+                                                            if (i.args.tokenId)
+                                                                MINT_1.message.push({ type: 'tokenId', content: i.args.tokenId.toString() });
+                                                            if (i.args._tokenId)
+                                                                MINT_1.message.push({ type: 'tokenId', content: i.args._tokenId.toString() });
+                                                        }
+                                                        if (i.name === 'TokenStolen') {
                                                             MINT_1.message.push({ type: '\r\nSTOLEN', content: showAddress(i.args._address) + " #" + i.args._tokenId.toString() });
                                                         }
                                                     });
