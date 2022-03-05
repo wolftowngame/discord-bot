@@ -239,14 +239,17 @@ const txCache: Record<string, boolean> = {};
 (async () => {
   const query = async () => {
     try {
-      const res = await Wolf.queryFilter({}, (-120 * 60) / 3, 'latest');
+      const res = await Wolf.queryFilter({}, (-30 * 60) / 3, 'latest');
       const adds: { tx: string; key: string }[] = [];
       const txCacheMap: Record<string, typeof adds[0]> = {};
+      let cccc = 0;
       res.forEach((item) => {
         if (item.blockNumber <= db.lastBlock) return;
         db.lastBlock = item.blockNumber;
         const key = item.transactionHash + item.logIndex;
         if (txCache[key]) return;
+        cccc++;
+        if (cccc > 100) return;
         txCache[key] = true;
         if (item.event !== 'Transfer' && item.event !== 'TokenStolen') return;
         if (!txCacheMap[item.transactionHash]) {

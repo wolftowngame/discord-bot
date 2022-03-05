@@ -311,22 +311,26 @@ var txCache = {};
         switch (_a.label) {
             case 0:
                 query = function () { return __awaiter(void 0, void 0, void 0, function () {
-                    var res, adds_2, txCacheMap_1, _loop_2, _i, adds_1, msg, e_2;
+                    var res, adds_2, txCacheMap_1, cccc_1, _loop_2, _i, adds_1, msg, e_2;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
                                 _a.trys.push([0, 6, 7, 8]);
-                                return [4 /*yield*/, Wolf.queryFilter({}, (-120 * 60) / 3, 'latest')];
+                                return [4 /*yield*/, Wolf.queryFilter({}, (-30 * 60) / 3, 'latest')];
                             case 1:
                                 res = _a.sent();
                                 adds_2 = [];
                                 txCacheMap_1 = {};
+                                cccc_1 = 0;
                                 res.forEach(function (item) {
                                     if (item.blockNumber <= db.lastBlock)
                                         return;
                                     db.lastBlock = item.blockNumber;
                                     var key = item.transactionHash + item.logIndex;
                                     if (txCache[key])
+                                        return;
+                                    cccc_1++;
+                                    if (cccc_1 > 100)
                                         return;
                                     txCache[key] = true;
                                     if (item.event !== 'Transfer' && item.event !== 'TokenStolen')
